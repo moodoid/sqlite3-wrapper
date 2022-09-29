@@ -139,14 +139,14 @@ class Sqlite3Wrapper:
         else:
             pass
 
-    def write_to_db(self, table_name: str, data: pd.DataFrame, primary_key: str = None):
+    def write_to_db(self, table_name: str, data: pd.DataFrame, primary_key_cols: List[str] = None):
         """
         Creates table in database (if table doesn't exist already) and inserts or replaces values
         in table potentially based on primary key constraints.
 
         :param table_name: Table name for which to insert or replace values into
         :param data: Data to perform a string based insert.
-        :param primary_key: Column name to set primary key constraint on.
+        :param primary_key_cols: Column name to set primary key constraint on.
         :return:
         """
         df_ = data
@@ -160,8 +160,8 @@ class Sqlite3Wrapper:
             list(map(lambda x: f'{x} {self.sql_datatype_conversion(df_.iloc[inspect_idx, :][x])}', df_.columns)))
 
         # setting primary key when creating table
-        if isinstance(primary_key, str):
-            create_table_col_string += f', PRIMARY KEY ({primary_key})'
+        if isinstance(primary_key_cols, str):
+            create_table_col_string += f", PRIMARY KEY ({', '.join(primary_key_cols)})"
 
         if table_name not in self.fetch_all_table_names():
             query = f"CREATE TABLE {table_name}({create_table_col_string})"
@@ -196,5 +196,3 @@ class Sqlite3Wrapper:
         self.execute(query)
 
         return self.fetch_frame()
-
-
